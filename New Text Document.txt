@@ -1,0 +1,795 @@
+INTERVIEW QUESTIONS ON JAVA, REST, SOAP, MICROSERVICE, SPRINGBOOT, MYSQL, DOCKER And MAVEN
+
+Author: Sumit Saurabh
+GitHub: https://github.com/sumitinstates
+
+-------------- What is microservice and its advantages?
+Microservice is architectural style of developing application, where an application is broken into multiple services and each service talks to each other through REST api or through messaging service like JMS.
+Advantages:
+1.	Each service can be deployed independently
+2.	Each service is scalable.
+3.	If one of the services is down, then whole will not shut down. We can bring down the service, which is down, fix the issue and independently deploy it.
+4.	Each service has its own database in spite of having only one database.
+Disadvantages:
+1.	Debugging is complex.
+2.	Converting monolithic application, which has only one database, to microservice will be challenging.
+
+----------- How do u maintain data consistency in Microservice?
+we have SAGA concept for that. SAGA is a sequence of all local transactions. In SAGA one service will not start its transaction until the previous service has completed its transaction successfully. Let us say there are 10 services, and first service started its transaction then second service will not start its transaction until first service completes its transaction. and it continued till all 10 services has completed its all transaction successfully. Then we say SAGA is completed. But let us say one of the services failed its transaction in middle. Like let’s say service 3 fails its transaction after service 2 completed its transaction successfully, then in that case for each service, there will be one compensatory action is coupled. So, when service 3 fails, compensatory action correspondent to service 3 will be activated and will undo all the previous transaction till service 1. 
+
+------------ What if even compensatory action fails?
+then in that case SAGA will keep on start compensatory action till it succeeds.
+
+----------- How to handle when Microservices are connected to each other and one of those services fails?
+there is a concept called circuit breaker in microservices. so, let us say one service A is calling another service B and it fails. Now, again that service A calls service B and it fails again, and it continued till tenth times then there is high probability that eleventh time also it will fail. so, to avoid this we have circuit breaker concept where a threshold value is set (minimum value after which circuit breaker is active) so once failure to call a particular service exceed threshold value, then circuit breaker will be active, and that service will be deactivated for particular timeout. Now when that timeout is over, then there will be again some limited trial to call that service which was not responding back. if call is successful then circuit breaker will be off else it will be reactivated.
+
+------------ Difference between SOA and Microservices?
+SOA stands for service oriented architecture. so basically, while developing application using SOA architectural style, we kind of develop application in monolithic way only because services in SOA cannot be independently deployed as in microservices and SOA also focuses on concept of sharing as much as possible, so services are not loosely coupled as in microservices. 
+
+------------ How to maintain data transaction in Microservice?
+Using SAGA Pattern. That maintains data like this:
+If any transaction occurs from service A to service B and if transaction fails from service B to service C, then whole transaction from service C to service A is undone or rollback. So SAGA Pattern ensures that any transaction will be either completely successful from one service to another, or it will be undone in case any transaction fails in middle.
+
+------------- How service is handled in case if any service is down in Microservice?
+We follow circuit break concept. Let us say if service A calls service B and service B fails to respond then service will re try to call service B for certain amount of time and if it still doesn’t respond, circuit breaker will be activated, and service B will shut down. After certain amount of time, service A will re-try to call service B, if service B responds back then circuit breaker will be deactivated else it will be activated again.
+
+------------- AJAX vs REST?
+1.	Rest is the architectural style of using HTTP methods, which returns Json objects.
+2.	Ajax is a set of technologies. It is a method to dynamically update parts of the UI without having to reload the page.
+
+-------------- SYNCHRONOUS vs ASYNCHRONOUS?
+1.	Synchronous means that you call a web service (or function or whatever) and wait until it returns all other code execution and user interaction is stopped until the call returns. 
+2.	Asynchronous means that you do not halt all other operations while waiting for the web service call to return. Other code executes and/or the user can continue to interact with the page (or program UI).
+Example: 
+SYNCHRONOUS: You are in a queue to get a movie ticket.  You cannot get one until everybody in front of you gets one, and the same applies to the people queued behind you.
+ASYNCHRONOUS: You are in a restaurant with many other people.  You order your food. Other people can also order their food, they do not have to wait for your food to be cooked and served to you before they can order. In the kitchen restaurant workers are continuously cooking, serving, and taking orders. People will get their food served as soon as it is cooked.
+
+-------------SOAP vs REST?
+1.	SOAP stands for Simple Object Access Protocol whereas REST stands for Representational State Transfer.
+2.	SOAP is a protocol whereas REST is an architectural pattern.
+3.	SOAP uses service interfaces to expose its functionality to client applications. 
+4.	while REST uses Uniform Service locators to access to the components on the hardware device.
+5.	SOAP needs more bandwidth for its usage whereas REST doesn’t need much bandwidth.
+6.	SOAP only works with XML formats whereas REST work with plain text, XML, HTML and JSON.
+7.	SOAP cannot make use of REST whereas REST can make use of SOAP.
+Note: SOAP cannot make use of REST because SOAP is a protocol but REST is architectural style.
+
+------------ Difference between POST and PUT method in REST?
+1.	POST is used to create resource, while PUT is used to update resource.
+2.	POST is not idempotent, while PUT is idempotent.
+
+-------------- What is idempotent method?
+Idempotent means method will give the same result every time it is called like GET, PUT, DELETE method of REST.
+POST method is not idempotent because it always creates a new resource when it is called.
+
+---------- Difference between authentication and authorization?
+Authentication means to verify your identity. Like when you login with your credentials. But authorization means permission to access any resource.
+
+----------- Difference between unauthorized and forbidden in REST?
+1.	Unauthorized means client is not authenticated. And forbidden means client does not have permission to access the resource.
+2.	HTTP status code for Unauthorized is 401, while HTTP status code for forbidden is 403.
+
+------------- How to handle exceptions in REST?
+1.	Create a class and annotate it with @ControllerAdvice annotation.
+2.	Inside the controller advice class, define different method for different exception and each method is annotated with @ExceptionHandler annotation and @ResponseStatus to send custom message to client so that client can understand the reason of exception. If @ResponseStatus s not used, Client will HTTP Status code if any exception occurs, which client might not understand the meaning of code.
+
+------------ HTTP status codes for Webservices 
+1.	200 – ok
+2.	201 – created
+3.	202 – accepted
+4.	400 – bad request
+5.	401 – unauthorized
+6.	403 – forbidden
+7.	404 – resource not found
+8.	405 – method not allowed
+9.	500 – server error
+10.	503 – service unavailable
+
+----------content type vs accept type?
+At server side, an incoming request may have an entity attached to it. To determine it’s type, server uses the HTTP request header Content-Type.
+Some common examples of content types are “text/plain”, “application/xml”, “text/html”, “application/json”, “image/gif”, and “image/jpeg”.
+Similarly, to determine what type of representation is desired at client side, HTTP header ACCEPT is used. 
+It will have one of the values as mentioned for Content-Type above.
+
+---------- How to create Rest web services?
+1)	so basically, we first add required starters/dependencies in our pom.xml file. like core starters, web starters etc.
+2)	create a spring initializer class and annotate it with @Springbootannotaion. this will be the entry point of application.
+3)	create a model class or POJO class to implement REST resources.
+4)	Create a Rest controller class and annotate it with @RESTCONTROLLER and @ REQUEST MAPPING annotation. and inside this class define methods and annotate it with @GETMAPPING annotation, or @PUTMAPPING annotation to handle different incoming requests.
+5)	Deploy it on sever.
+
+---------- How to enable security in webservices or microservices? (which framework? = spring boot)
+
+1.	include spring security starter in pom.xml file as dependancy.
+2.	we extend websecurityconfigureradapter class and inside this class,
+3.	we override the configure() with HTTP basic security for authentication
+4.	and AuthenticationmangerBuilder for assigning roles like admin or custom user.
+
+another way is using OAUTH 2 token. (security on application layer).
+If a client send request to any service, then token will be sent in request header. and service will extract this token from request header. If token is valid then request is authenticated else, it will unauthenticated.
+
+-------- Response Entity class?
+It is extension of HTTP entity class which is used to access response body and bind response body with http status codes and headers
+
+------------ Why have you used soap to expose webservice and why not REST?
+because the incoming request must be in xml format only.
+
+---------- How make soap request using http client?
+1.	Add apache http client in pom.xml
+2.	Create Httpclient class
+3.	Create httpclient object 
+4.	Create StringEntity object that takes two parameters: soapRequestBody and CharacterSet
+5.	Create httppost object that takes soapurl as parameter
+6.	using httppost object, set header as "SoapAction" with its value "SoapOperationName",
+1.	set entity that takes stringentity object as parameter
+7.	create httpresponse object that calls eexcute method of httpclient class that takes httppost oject created as parameter.
+
+--------- Advantages of apache cxf over apache axis2 in spring ws?
+1.	It has better performance
+2.	It supports ws-security and ws-policy 
+3.	It has better security.
+4.	It supports both JAX-WS and JAX-RS
+5.	It is easily compatible with spring framework.
+
+---------- Advantages of xml over json?
+1.	it supports complex data type like images and non-primitive date type also. However, Json only supports array, string, Boolean, objects, numbers and only primitive data type objects.
+2.	It supports comments, namespaces.
+3.	It is more secured over json.
+
+---------- Advantages of json over xml?
+1.	it is easier to parse json.
+2.	it is easily consumed by JavaScript
+3.	fetching elements is easier.
+4.	it supports utf as well as ASCII encodings. However, xml only supports utf encoding
+5.	It is fast and consumes less memory space as it is small in size.
+
+-------- JSON to java objects?
+If one wants to create Java object from JSON and vice versa, use GSON or JACKSON third party jars etc.
+
+//from object to JSON 
+Gson gson = new Gson();
+gson.toJson(yourObject);
+
+// from JSON to object 
+yourObject o = gson.fromJson(JSONString,yourObject.class);
+
+----- how to get JSON response in spite of XML in Spring ?
+We have to include only jackson dependencies into classpath of the application and spring will register Jackson2JsonMessageConverter class automatically into context. So, whenever we ask for a resource from REST API and provide http header "accept: application/json", we will get back the json representation of resource.
+Use Accepts and Content-Type HTTP headers.
+•	If you want to exchange data in JSON format, set both headers to application/json. 
+•	If you want XML instead, set both to application/xml.
+
+------- API vs Webservices?
+The difference is that Web Service almost always involves communication over network and HTTP is the most used protocol. Web service also uses SOAP, REST, and XML-RPC as a means of communication. While an API can use any means of communication e.g., DLL files in C/C++, Jar files/ RMI in java, Interrupts in Linux kernel API etc. So, you can say that-
+1.	Web Service is an API wrapped in HTTP.
+2.	All Web Services are API, but APIs are not Web Services.
+3.	Web Service might not perform all the operations that an API would perform.
+4.	A Web Service needs a network while an API does not need a network for its operation.
+
+--------- How HashMap works internally?
+HashMap contains array of buckets and each bucket or node contains LinkedList. So when put(k,v) is called then internally put method finds the hash code of key by calling hashcode() on the key. And find the appropriate index where a node or linked list is created which stores hash code, key, value and reference to next node if exist or null. and when get(k) is called then again internally hash code of key is found out and with that hash code appropriate bucket is find out and the value object is returned. But when has collision occurs in in calling put(k,v) method, then hash code of key is calculated and then right bucket if found out. if inside the bucket there is already a LinkedList then a new linked list is created after the already existing LinkedList and all the properties like hash, key, value are stored in new LinkedList. And when Get(k) method is called then iteration through LinkedList takes place and right key is found out by calling equals() till it returns true and then value is returned for right key.
+
+---------- Format to be KEY in HashMap?
+A simple thumb rule is to use immutable objects as keys in a HashMap. because: If it were mutable, then the hashcode() value or equals() condition might change, and you would never be able to retrieve the key from your HashMap .You can use any object in a HashMap as long as it has properly defined hash Code and equals methods those are absolutely crucial because the hashing mechanism depends on them.
+
+--------- HashMap vs HashTable vs HashSet?
+1.	HashMap and hashset are not synchronized. While hashtable is synchronized.
+2.	HashMap is faster than rest. 
+3.	HashMap cannot have null keys but can have multiple null values. But hashtable cannot have any null values. Hashset also doesnt have null values. 
+4.	HashMap implements map interface and hashset implements set interface.
+
+-------- Difference between Stack and Queue?
+1.	Stack works on the principle of LIFO (Last In first out) to access and add elements, While Queue works on the principle of FIFO. 
+2.	Stack has only one end opened, While Queue has both ends opened.
+
+----------- Servlet vs JSP?
+1.	Servlet is java or server side program used to create dynamic web page, while JSP is web page used to create dynamic page.
+2.	Servlet is faster than JSP as JSP is first compiled into servlet if any request comes in before execution.
+3.	Servlet can handle any protocol request, while JSP can handle only HTTP protocol request.
+4.	In MVC architecture, Servlet acts as controller, While JSP acts as view. Servlet is HTML in JAVA CODE, While JSP is Java Code in HTML Page.
+
+------- Include directive vs include action of JSP?
+They both used to import file. But directive include during compilation time of JSP to servlet, while action include during the request time only. So, action is dynamic import, while directive is static import.
+
+-------- JSP forward vs redirect?
+They both transfer the resources from one JSP to another. But, forward does that to same URL and hence faster, While redirect does that to the different domain or URL and hence slower
+
+------- Logic to find duplicates in array of integers.?
+for(int i=0; i <length; i++)
+for (j = i+1 ; j<length ; j++){
+if(a[i] == a[j])
+{
+duplicates found
+}}}
+
+--------- Logic to find occurrence in String?
+HashMap<Character, String> hm = new HashMap<Character, String>();
+
+for (int i=0; i< length ; i++){
+if(hm.get(a.charAt[i]!=null){
+hm.put (a.charsAt[i], hm.get(a.charsAt[i])+1);
+}
+else{
+hm.put (a.charsAt[i], 1);
+}
+
+for (Character c : hm.keyset())
+{
+systemout("Occurence of charsAt a[i] :" + hm.get(a.charsAt[i]));
+}
+
+-------- Advantages of JavaScript?
+1.	It does not need compilation
+2.	It is client-side language, so it doesn’t need server to verify the result so it
+reduces load on server and for same reason it is fast also.
+3.	It is compatible with all modern browsers.
+
+------- Disadvantages of JavaScript?
+1. Since it is client-side code so it can be malicious also hence it is less secure.
+
+------ Autoboxing vs Auto unboxing?
+Autoboxing - conversion of primitive data types into wrapper class object
+Auto unboxing - Reverse of autoboxing.
+
+------ What is Hashing?
+It means generating a unique number of an object.
+
+------ Difference between ECMA5 and ECMA6?
+ECMA6 introduced let and const keywords. It also supports lambda or arrow functions.
+
+------ ECMA script vs JavaScript?
+ECMA script is standard way of writing scripting language and JavaScript follows ECMA script standard.
+
+----- let vs var variable in JavaScript?
+1.	var is globally accessible.
+2.	var is function level variable, while let is block or scoped level variable.
+
+---------- Some methods of stringbuilder or stringbuffer?
+append, replace, delete, tostring, capacity
+
+---------- Some methods of string?
+concat, substring, endswith, startswith, replace, replaceall, tostring, valueof, insert
+
+----------How to prevent reflection, cloning, serialization and deserialization from breaking singleton pattern ?
+1.	override the clone method and throws clonenotsupportedexception
+2.	override readResolve method
+3.	use Enum singleton design pattern
+
+----------Why JMS is required over Rest for microservices?
+•	JMS is loosely coupled.
+•	JMS provides asynchronous communication. So application can send request to server and process multiple requests in parallel in spite of waiting for response.
+
+---------Why we use @ResponseStatus annotation?
+when exception is handled then basically it will just map the exception type to their HTTP status codes only which is not understandable by client. So we have to provide them useful message that they can understand. so for that we use @ResponseStatus annotation, which let us write custom messages that we want to send to client.
+
+----------How do you create objects in JAVA without constructor?
+using cloneable interface, so you can pass the object in cloneable object and it will just clone it.
+
+--------- What is Spring MVC (Web frameworks )?
+.  Model - A model contains the data of the application. A data can be a single object or a collection of objects.
+.  Controller - A controller contains the business logic of an application. Here, the @Controller annotation is used to mark the class as the controller.
+.  View - A view represents the provided information in a particular format. Generally, JSP+JSTL is used to create a view page. Although spring also supports other view technologies such as Apache Velocity, Thyme leaf and Free Marker.
+.  Front Controller - In Spring Web MVC, the Dispatcher Servlet class works as the front controller. It is responsible to manage the flow of the Spring MVC application.
+
+---------Difference between server-side scripting and client-side scripting?
+The main difference between server-side scripting and client-side scripting is that the server-side scripting involves server for its processing. On the other hand, client-side scripting requires browsers to run the scripts on the client machine but does not interact with the server while processing the client-side scripts.
+
+---------Setup Delivery Pipelines in Jenkins?
+1.	chain your jobs with each other
+2.	for that go to configure and then under
+3.	build trigger check on build after project is built.
+4.	Install delivery pipeline plugin
+5.	Add delivery pipeline view
+6.	Go to dashboard and click on + 
+7.	then give view name and type of view.
+8.	In pipeline section under component section
+9.	give initial job name.
+
+--------Setup build Pipelines in Jenkins?
+1.	chain your jobs with each other. For that, go to configure and then under
+2.	build trigger check on build after project is built.
+3.	Install build pipeline plugin
+4.	Add build pipeline view
+5.	go to dashboard and click on + and then give view name and type of view.
+
+----------How to make user defined class object sortable in java?
+using comparable or comparator.
+
+--------Difference between stacks and queues?
+The difference between stacks and queues is in removing. In a stack we remove the item the most recently added, and in a queue, we remove the item the least recently added.
+
+--------What is Lazy loading?
+It is a concept where we delay the loading of object until the point where we need it.
+Below are the advantages of lazy loading:
+1.	Minimizes start up time of the application.
+2.	Application consumes less memory because of on-demand loading.
+3.	Unnecessary database SQL execution is avoided.
+
+The only one disadvantage is that the code becomes complicated.
+
+---------- Docker file?
+Docker file is a text file that includes instruction of how to create an image.
+
+---------- How to build image in docker?
+docker build -t imagename .
+
+--------- How to run container in docker?
+docker run --detach --name my_new_container imagename 
+
+------- docker compose up?
+docker compose up is used to run multiple 
+container with one command and that is "docker build compose up".
+
+------ docker-compose run vs docker-compose up vs docker-compose start?
+run - run particular container from the services
+up - run all the services
+start - restart the already created container that was stopped.
+
+------ difference between containerization vs virtualizations?
+Containerization means running multiple applications on a single OS on a single server. While virtualization means running multiple Operating Systems on a single virtual server.
+
+---------- What is marker interface?
+Marker interface does not have any members. Example: Serializable and cloneable interface.
+
+---------- What is Functional interface?
+It is an interface that has only one abstract method. 
+Example: Runnable interface
+
+------------ What is Serialization?
+It means converting java objects into stream of bytes so that it can be transferred over the network.
+
+--------- Disadvantage of Serialization?
+1.	Thought transient variables in not serialized but memory space is still assigned so it is memory ineffective. 
+2.	Serialization breaks the singleton design pattern. 
+3.	It cannot serialize the static members also as static members belong to class, and not to objects.
+
+----------- Important points about serialization?
+1.	When a class that is being serialized, all the dependencies in the class also must implement serializable interface.
+2.	If a parent class already implements serializable interface, then child class doesn’t need to implement serializable interface.
+
+----------- Deep copy vs Shallow copy?
+In deep copy all the dependencies of a class are also cloned. But in shallow copy dependencies is not cloned. By default, when we implement cloneable interface, it does shallow coping.
+
+----------- Difference between FileInputStream and BufferedInputStream?
+1.	FileInputStream reads from File Reader, While BufferedInputStream reads from another stream.
+2.	FileInputStream reads one byte at a time so let us say if there are 255 bytes in a file, it will make 256 API calls to read it. But, BufferedInputStream reads multiple bytes at a time, so it might have to make only 2 API calls to read and so its performance is better.
+
+------------FileReader and FileInputStream?
+1.	FileReader is used to read text file with default encoding, while latter is used to read binary data.
+2.	FileReader reads data from character stream, while latter reads data from byte stream.
+NOTE: If you want to read text file with different encoding, then use InputStreamReader.
+
+------------ Fail Fast vs Fail Safe Iterators?
+1.	Fail fast will throw exception if collection is modified while iterating over it as they use original collection copy to iterate over and hence does not require extra memory. Iterators for list, set, and map is by default Fail Fast. So, to make a list immutable, we can call Collections.unmodifablelist(list),
+Collections.unmodifableSet(set),
+Collections.unmodifableMap(map)
+2.	Fail safe iterator is reverse of Fail Fast. Iterator for concurrent hash map is fail safe by default.
+
+-------------- How is class loaded in Java?
+There are three class loaders. That is Bootstrap class loader, Extension class loader, and System class loader. Boot strap class loader is parent of all class loader and loads the core classes from rt.jar like java.lang and java.util class from lib folder. Extension class loader is used to load class from extension of core classes. And System class loader loads the user defined classes. Now, In Java, Class Is loaded at runtime when it is needed. So, when JVM request to load class, then request is first gone to boot strap class loader. If it does not find the class, then request goes to Extension class loader. If extension class loader does not find then request goes to system class loader and if even system class loader does not find class then eventually request goes to URL class loader and if URL class loader also does not find the class, then ClassNotFoundException is thrown.
+
+----------- How to see what jar files are being used by JVM?
+Run following command: verbose:class
+
+----------How to create custom class loader?
+Extend class extending classloader class and override the loadClass() method.
+
+-------------- Difference between EAR, WAR, and JAR?
+JAR contains java classes, libraries, text and images. It is deployed using command line and does not need server to deploy the application. 
+WAR is also known as web modules that contains web project and includes HTML, CSS, JSP, JAVASCRPT, SERVLETS. It needs server to deploy the application.
+EAR packages different modules into a single archive. It also needs server to deploy the application. In another way, EAR bundles all WAR files in a single archive.
+
+------------- Can we override static methods?
+No, as Overriding is resolved at runtime and static method is resolved at compile time.
+
+------------- Can we make constructor final?
+No, point of using final with a method is to prevent method from overriding or from inheritance, but in inheritance, constructor of parent class is not inherited by child class by default, so it does not make any sense to make it final.
+
+-------------- Can we make constructor private?
+Yes, in case of singleton class so that it is not initialized outside the class.
+
+------------- Can we have two main methods in an application?
+Yes, we can have as method overloading is allowed. But make sure both main methods should not have string array as arguments.
+
+----------- Can we override main method?
+No, as main method is static method and static method is resolved at compile time and overriding is resolved at run time.
+
+------------ Can we initialize static variables from not static method?
+No, we cannot. We can only initialize static variables from static method only else it will give compile time error.
+------------- Difference between Arraylist vs Linkedlist?
+1.	Arraylist is faster when we just want to do read operation based on index number. But in linkedlist, we must iterate over the list from start to end in order to reach the destination.
+2.	Linkedlist is faster when we want to add or delete elements as in linked list there is not bit shifting after adding or deleting an element as we have in Arraylist.
+3.	Arraylist only acts as list, but linkedlist can acts as both queue and list.
+
+------------ Difference between Collection and Collections?
+Collection is an interface, while Collections is a class that provides different methods that we can use to process Collection like list, set.
+
+------------ Is it thread safe when two threads iterating over loop?
+It depends. if it is just read operation then it is thread safe. But if it is read operation then it is not thread safe as if one thread updates the value, then other thread might not be aware of update value and so there will be no correct result.
+
+---------- Feature of Java 8 / What features of Java 8 have you used?
+1.	Lambda expression.
+2.	Streams
+3.	Optional API
+
+----------- Difference between Stream and Collection?
+Collection like list, set is data structure, but stream is not data structure. It is just takes collection as input, process the data of collection.
+
+----------- Difference between terminal operations and intermediate operations of stream?
+Intermediate operations like filter will always return a stream. But a terminal operation like
+Collect returns a collection.
+
+------------Which is better between FOR LOOP and Stream?
+It depends. If you use sequential stream, then processing time for both loop and stream might be same. But, if use Parallel stream, then stream is better than loop most of the time.
+
+------------- Difference between Comparable and Comparator?
+1.	Comparable belongs to java.util package, while Comparator belongs to java.lang package.
+2.	Comaparble uses compareTo() method to sort the objects, while Comparator uses compare() to sort.
+3.	Comparable is single sorting sequence, while latter is multiple sorting sequence.
+4.	Comparable modify the actual class, but comparator does not.
+
+------------- What is lambda and its advantages?
+Lambda is an instance of functional interface. It makes code concise and let a method pass as an argument in another method.
+
+-------------- Advantages of Optional API in Java 8?
+1.	Null pointer check is removed.
+2.	No null pointer exception anymore.
+
+--------------- Difference between TCP protocol and HTTP protocol?
+TCP is Transport Layer Protocol that takes care of how data is sent and received. In TCP, data is sent is in ordered chunks which is called packets. And data received at receiver side is in the sane order how data is sent from sender side. And after data is received, it sends the acknowledgment receipt to sender to confirm data has been received. So, in case if there is packet loss, then receiver will be able to know that this particular packet is missing and would request sender to re-send the missing packet. Hence data transmission is secured on TCP protocol.
+HTTP protocol is application-level protocol takes care of how data is processed that means how it is read or written.
+In simple analogy, HTTP protocol is like an envelope where letter goes, where you can read or write message, and TCP protocol is like postal service that takes care of sending letter at right destination.
+
+-------------- What does volatile mean?
+When a variable is declared with volatile that means its value will be read directly from main memory, so that variable always get the update value.
+
+------------ How to prevent memory leak in java?
+1.	Less use of static variables
+2.	Always close the connection of resources like streams.
+
+------------ How to detect memory leak in java?
+1.	Enable verbose garbage collection for your application.
+2.	We can also use Java VisualVm.
+
+----------- How does Java manage memory leak?
+Java garbage collection is an automatic process. The programmer does not need to explicitly mark objects to be deleted. The garbage collection implementation lives in the JVM.
+
+------------- How to detect memory leak in eclipse?
+1.	Right click on project.
+2.	Go to properties option.
+3.	Select Java Compile option from left options
+4.	Select error/warning.
+5.	In dialog box appears, type leak and change the level to error
+6.	Click Apply
+
+----------- Difference between Factory design pattern and abstract factory design pattern?
+Factory design pattern uses inheritance to create objects at run time, while latter uses composition to create objects. Abstract factory design pattern is factory of factories because it creates other factories.
+
+---------- How to create immutable class?
+1.	Declare all method as final so it is not overridden.
+2.	Declare all field are private and final so its value remains unchanged.
+3.	Declare the class as final so that it is not inherited.
+4.	Provide getter method only and no setter method.
+
+---------- How to create singleton class?
+1.	Make constructor private so that it is not initialized outside the class.
+2.	Make all field as private static so that there is only once copy.
+3.	Declare a public get instance method which will initialize the new object if object is null.
+
+---------- Drawbacks of singleton class?
+1.	Singleton design pattern is not thread safe, so we need to use SYNCHRONIZED keyword with public get instance method in order to make it thread safe.
+2.	Singleton design pattern breaks during serialization, cloning. So, you need to override the read Resolve method when serializing. And you need to override the clone method when implanting cloneable interface.
+
+---------- Why is string immutable in java?
+1.	String is used to store sensitive information like password, so if it was not immutable, hacker could hack the information.
+2.	To follow string pool concept.
+3.	Since string is immutable, it is thread safe.
+
+--------- What is string pool concept?
+When string is created using “new” operator, it creates a new object and those objects are stored in heap memory. 
+When string is created using string literal that is like this:
+String s = “sumit”;
+Then JVM first check if there is already any other object with same content “sumit” or not. If it is not there it will create a new object, else it will return the reference of existing object that means lets say 
+String s1= “sumit”;
+String s2 = “sumit”;
+Then both s1 and s2 will refer to same reference.
+
+--------- Heap memory vs Stack memory?
+1.	Objects created with new operator is stored in Heap memory. And all the variables and reference is stored in stack memory.
+2.	Heap memory has more space than stack.
+
+---------- Whys is String not primitive data type in java?
+Primitive data type does not have its class. It must be converted into object with the help of wrapper class. For example, “int” is primitive data type so if we want to use Integer class methods on “int” data type, it must be converted into objects using wrapper class. But in java, String has its own class unlike other programming language and hence it is an object in java.
+
+----------- Difference between encapsulation and abstraction?
+They both are used to hide unwanted details from the user or client. But difference is that:
+1.	Encapsulation is achieved by class where all members are declared private and getter/setter method is provided for all members.
+2.	Abstraction is achieved by abstract class or interface.
+3.	Encapsulation hides the details at implementation level and Abstraction hides details at Design level. For example, In our smartphone, touch screen is example of abstraction at design level. And behind the touch screen there will be single green chip which connects all the parts is an example of encapsulation because all the units are interconnect at one unit like all members and method are interconnected in a class as single unit through getter/setter.
+
+----------- Difference between abstract class and interface?
+1.	Abstract class is used when we want to implement partial functionality. While interface is used when we want to provide just functionality, but let subclasses implements o the functionality.
+2.	Member variables of interface is by default private final and static. While abstract class can have both static and non-static methods, methods can be either private public or protected, final as well as not final.
+3.	Abstract class can extend java class as well as multiple interfaces, while interface can only extend one interface.
+4.	Interface provide total abstraction, while abstract class provides partial abstraction.
+
+-------------- Life Cycle of thread?
+1.	New – new thread is initialized
+2.	Runnable – thread in runnable state after start() method is called.
+3.	Running – thread in running state when run() is called.
+4.	Non runnable – thread is in Non runnable state when sleep() method is called.
+5.	Terminated – thread is dead when thread execution completes.
+
+
+------------- How to create a thread Class?
+1.	By Extending thread class.
+2.	By implementing runnable interface.
+
+-------------- How to stop a thread?
+By calling interrupt method.
+
+------------ Difference between run and start method of thread?
+1.	Start method can be called only once else it will give exception, while run method can be called more than once. 
+2.	Start method belongs to thread class, while run method belongs to runnable interface.
+
+----------- Can we start a thread that is terminated or dead?
+No, it will give illiegalStateException.
+
+----------- Difference between callable and runnable interface?
+1.	Runnable has run method, while callable has call method.
+2.	Return type of run method is void, while return type of call method is future object that store the value of result.
+
+------------ Why is run method of thread not called directly?
+If run method is called directly, then same thread that calls it will execute the logic of run method and hence it will violate the concept of multithreading concept and behave like a normal method. So, to avoid this situation, first start method is called because when a thread calls start method, it creates a new thread that calls the run method so and these both threads work parallelly.
+
+----------- Difference between sleep() and wait() of thread ?
+1.	Sleep method is used to pause for some time and it will wake automatically after the mentioned time.
+2.	Wait method will not wake thread automatically after pause, unless it called by notify () or notifyAll() method.
+3.	Sleep doesn’t release the lock on object while wait does.
+
+----------- Difference between notify() and notifyAll() of thread ?
+1.	First and main difference between notify() and notifyAll() method is that, if multiple threads is waiting on any lock in Java, notify method send notification to only one of waiting threads, while notifyAll()  informs all threads waiting on that lock.
+
+2.	If you use notify method, It's not guaranteed that, which thread will be informed, but if you use notifyAll() , all thread will be notified.
+
+------------- What is Daemon thread?
+It is low priority thread that is used for garbage collection.
+
+------------- What is Object Class in java?
+It is Parent class or Superset of all the classes. All the classes by default inherits all the properties of Object class.
+
+-------------- What is database sharding?
+It means data stored in a table is partitioned horizontally and kept across multiple servers to reduce the load on server. So, all tables will have same schema and columns after partition. It is needed when data is too large to store in single table in a single sever.
+
+----------Nth maximum salary in MySQL using LIMIT keyword?
+SELECT salary FROM Employee ORDER BY salary DESC LIMIT N-1, 1
+SELECT MAX(Salary) From Employee WHERE Salary < ( SELECT Max(Salary) FROM Employee);
+
+------ How to tune sql queries?
+1.	select only required field in spite of all fields
+2.	Use Inner join despite where clause in sql query
+3.	Use wildcards at the end of the phrase.
+
+------------- What is index in database?
+Index is used to search records in a table faster in spite of going through whole table. Think about a book, it has index pages. If Index pages were not there, and if you want to find particular chapter, you will have to got through whole book from start to end in order to find it, which will take a lot of time. So, with the help of index, we can just jump to that page number in order to find the chapter. This is how index works in database also. It enhances the search operation and reduces times. There are two types of index:
+1.	Clustered Index.
+2.	Non clustered index.
+
+----------------- Clustered Index vs Non clustered indexing in database?
+1.	Clustered index physically sorts the data in table based on primary key. While latter does not sort the data physically as index are stored at different location and actual table is stored at different location and they both tables are connected through foreign key.
+2.	There can be only one clustered index per table, but there can be multiple non clustered indexes per table.
+
+-----------Joins in SQL? 
+used to fetch/retrieve data from two or more data tables, based on a join condition. 
+1.	Innerjoin - Inner join returns only those records/rows that match/exists in both the tables.
+2.	outerjoin - 
+i.	leftouterjoin - returns all records/rows from left table and from right table returns only matched records. 
+ii.	rightouterjoin - join returns all records/rows from right table and from left table returns only matched records. 
+iii.	fullouterjoin -combines left outer join and right outer join. returns all records/rows from both the tables
+3.	crossjoin - join does not need any condition to join two tables.
+4.	selfjoin - join a database table to itself, particularly when the table has a Foreign key that references its own Primary Key.
+
+-------------Difference between Truncate table and Delete table in sql?
+DELETE command can be used with WHERE clause. But Truncate cannot be used. so, they both will delete whole table if WHERE clause is not used in DELETE command. And they both can be rolled back(undone).
+
+---------------- Types of Transaction Management?
+1.	Declarative Transaction Management, where you use annotation or xml configuration to enable transaction like using @Transcational annotation.
+2.	Programmatic Transaction management, where you write logic to manage transactions.
+
+----------------- How do you manage transactions in database?
+Following ACID operations that stands for ATOMICITY, CONSITENCY, ISOLATION, DURABILITY.
+1.	ATOMICITY: Either sequence of operations is successful or unsuccessful.
+2.	CONSISTENCY: Data is in a consistent state when a transaction starts and when it ends.For example, in an application that transfers funds from one account to another, the consistency property ensures that the total value of funds in both the accounts is the same at the start and end of each transaction.
+3.	ISOLATION: Each transaction should be isolated from other to prevent data corruption.
+4.	DURABILITY: The result of transaction must be made permanent and cannot be erased due to system failure.
+
+-------- How to create spring boot application?
+using spring starter, Spring initializer.
+
+---------------- Advantages of spring boot?
+1.	It increases productivity time.
+2.	It reduces development time for developers.
+3.	It uses minimum annotations compared to normal spring project.
+4.	It has embedded tomcat and jetty server and in memory databases, so it reduces development time.
+5.	It can create standalone application.
+
+----------- What are beans in spring boot?
+Beans is nothing but objects of class.
+
+----------- Scopes of beans?
+1.	Singleton by default means there will only be one object.
+2.	Prototype means every time new bean will be created.
+3.	Request means as long as request is active, bean is active and as soon as request is completed bean will be out of scope.
+4.	Session means as long as session is active, bean is active and as soon as request is completed bean will be out of scope.
+5.	Global
+
+------------ Application Context vs Bean Factory container of spring boot?
+1.	Bean factory only creates a bean when it is called getBean() method. While Application context creates bean as soon as application starts.
+2.	Application context supports all the features of Bean Factory as well as annotation support.
+
+
+---------- IOC vs DI?
+IOC means inverting the control of creating an object that is in spite of developer creating object by doing hard coding, something else like spring IOC container will create object for it. This will give loose coupling 
+And DI is design pattern that implements IOC which can be done in three ways: constructor injection, setter injection, interface injection.
+
+------ @Bean vs @Component?
+1.	Bean is method level annotation, while component is class level
+2.	components are auto detected and injected by spring container, while bean is explicitly registered with spring container.
+
+------- @configuration vs @bean vs @component?
+1.	@configuration - source of bean definitions
+2.	@bean - returns bean to be registered in spring application context.
+3.	@component - automatically scans classes and register it as bean in spring container.
+4.	@Repository - it has persistence exception enabled.
+
+-------- Difference between @pathvaribale and @pathparam?
+they both have same purpose of reading uri values.
+pathvariavle is spring mvc framework annotation and pathparam is jax-rs annoatation.
+
+-------- Difference between @Requestbody vs @responsebody
+1.	requestbody - binds the method parameter to http request body. It Maps the http request body to java object enabling automatic deseralization.
+2.	responsebody - return object should be written into http response body.
+
+-------- Difference between @RequestParam and @QueryParam?
+They both have same purpose.
+1.	Request param - spring mvc annotation
+2.	Queryparam - jax -rs annotation
+
+------------ Difference between CRUD repository and JPA Repository in spring boot?
+1.	CRUD repository has basic CRUD operations for create, read, update and delete.
+2.	JPA Repository has all the methods of CRUD repository with some other methods like page sorting method for page.
+
+----------How to create custom starter in spring boot?
+1.	Add “spring-boot-autoconfigure” dependency in pom.xml
+2.	Ad “spring-boot-configuration-processor” dependency to your pom file for the metadata to be generated.
+3.	Create Configuration Class and annotate with @ConditionalOnClass
+4.	Create “spring.factories” file in META-INF folder and point autoconfigure property to the fully qualified configuration class. As when spring boot loads it loads all the configuration class mentioned in “spring.factories” file.
+5.	Put the starter project as dependency in pom.xml file with naming convention as "name-spring-boot-starter" in another project.
+
+
+---------How do you connect spring boot (JPA) to database?
+1.	include all starters including JPA starter in pom.xml files.
+2.	we include database username, password in application.properties file
+3.	which is in class path src/main/resources.
+4.	we create spring boot initializer class as entry point of application.
+5.	we create an entity /pojo class and annotate it with @entity annotation which will
+6.	map this class to database table.
+7.	we extend the spring boot default repository class (JPA repository class) for CRUD operations.
+8.	(create, read, update, delete operations).
+
+------------- Difference between save and persist method in Hibernate?
+1.	Save method is Hibernate specific that is used to persist the object in Database
+2.	Persist method is available in all JPA implementations including hibernate and it also stores object in database.
+3.	But Save returns the identifier after object is persisted and load method does not have return type.
+
+------------ Difference between get and load method in Hibernate?
+1.	They both are used to retrieve object from database. Get returns the real object and if object is not found then it returns null, but load returns the proxy object and throws exception if object is not found.
+
+------------ Difference between JPA and Hibernate?
+JPA is specification and Hibernate is one of the JPA implementations.
+
+------------ Difference between JDBC and Hibernate?
+In JDBC, we have to manually write the queries, but in hibernate we don’t have to write the queries. Hibernate will run the query automatically behind the scenes.
+
+------------ Hibernate Connection steps?
+Configuration c = new Configuration()
+c.configure();
+SessionFactory sf = c.buildSessionFactory();
+Session s = sf.openSession();
+s.beginTransaction();
+	    s.save(s1);
+	    s.save(s2);
+	    s.save(C1);
+	    s.save(C2);
+	    s.getTransaction().commit();
+s.close();
+sf.close();
+
+----------- Difference between first level cache memory and second level cache memory in Hibernate?
+1.	First level cache is related to session, while latter is related to session factory.
+2.	First level is enabled by default, while latter has to be enable explicitly using cache provider like eh cache.
+
+--------- How to implement Second Level Cache?
+1. Add ehcache Maven Dependency 
+2. Add this in properties file:
+       2.a) hibernate.cache.use_second_level_cache=true
+       2.b) hibernate.cache.region.factory_class=org.hibernate.cache.ehcache.EhCacheRegionFactory
+3. Add: @Cacheable as well as @org.hibernate.annotations.Cache annotation and specify a cache concurrency strategy for entity class 
+
+Different Strategy: read-only, nonstrict-read-write, read-write, transactional
+Note:
+1.	Collections are not cached by default, and we need to explicitly mark them as cacheable as this:
+@Entity
+@Cacheable
+@org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
+public class Foo {
+
+    @Cacheable
+    @org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
+    @OneToMany
+    private Collection<Bar> bars;
+
+    // getters and setters
+}
+2.	Hibernate stores collections in separate cache regions, one for each collection. The region name = fully qualified class name + the name of collection property, for example, in above example: com. baeldung. hibernate.cache.model.Foo.bars.
+3.	Id (primary key) is not stored (it is stored as part of the cache key)
+4.	Transient properties are not stored
+5.	Non-association property values are stored in their original form Only id (foreign key) is stored for ToOne associations.
+
+----------------One to Many Association Implementation in Hibernate?
+1.	In parent Class, use @OneToMany annotation above the file where we want to map and put attribute like mappedBy to tells Hibernate which is parent class in the child class. And, to establish bi-directional flow, and cascade Type.
+
+2.	In Child class, use @ManyToOne annotation above the reference of parent class. Add @Joincolumn annotation also that takes attribute “name” to tell hibernate which is foreign key column.
+
+Example:
+@Entity 
+public class Cart { 
+//... 
+@OneToMany (mappedBy="cart”, cascade=CascadeType.ALL) 
+private Set<Items> items;
+
+//... 
+}
+
+
+@Entity 
+@Table(name="ITEMS") 
+public class Items {
+ //... 
+@ManyToOne 
+@JoinColumn(name="cart_id", nullable=false) 
+private Cart cart; 
+public Items() {} 
+
+// getters and setters 
+}
+--------How do u create entity in hibernate?
+1.	using @ entity annotation above the class.
+2.	@Table annotation to map it as table in database.
+3.	@column annotation to map it as column in table in database.
+
+------- How to configure maven?
+1.	Add "MAVEN_HOME" and "M2_HOME" and set each value to maven installation folder 
+2.	Add path with "maven installation/bin"
+3.	open cmd and run mvn -v
+
+------------- Structure of maven project
+1.	There is pom.xml file that contains all the required dependencies to develop an application.
+2.	It contains src/main/java folder that contains all the user defined java classes.
+3.	It contains src/main/resources that contains all the properties files and wsdl files.
+4.	There is a webapp folder inside which we have WEB-INF folder inside which we have web.xml file that is used to load all servlets based on URL mapping.
+5.	We have WEB-INF/lib folder where all the jar files are stored.
+6.	We have WEB-INF/class folder where all the compiled classes are stored.
+7.	It contains target folder where all the generated files are stored and built project WAR files are stored.
+
+------------ Which dependency is picked up by Spring boot if two same dependencies of different version are found at POM.XML file?
+Dependency that is closest to you project through dependency tree structure will be chosen.
+But let us say if both dependencies are equally close to your project through dependency tree, then one that comes first in class path will be picked up. Also, if you want to use particular version of dependency only irrespective of its closeness to project structure, you can use <dependencyManagement> tag to manage it.
+
+---------- How to see what dependency is being used by project?
+Run following command:  maven dependency: tree
+
+------------How to skip running test phase in maven?
+Run following command: mvn clean install -DskipTests 
+But this command will still compile the test and create artifacts. If you don’t want to compile as well as run test classes, then “mvn package -Dmaven.test.skip=true “. But it might give build failure for the module who need the test artifacts.
+
